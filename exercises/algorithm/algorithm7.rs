@@ -3,7 +3,6 @@
 	This question requires you to use a stack to achieve a bracket match
 */
 
-// I AM NOT DONE
 #[derive(Debug)]
 struct Stack<T> {
 	size: usize,
@@ -31,8 +30,14 @@ impl<T> Stack<T> {
 		self.size += 1;
 	}
 	fn pop(&mut self) -> Option<T> {
-		// TODO
-		None
+		// 如果栈不为空，则弹出最后一个元素并更新栈的大小
+		if self.size > 0 {
+			self.size -= 1;
+			self.data.pop()
+		} else {
+			// 如果栈为空，则返回 None
+			None
+		}
 	}
 	fn peek(&self) -> Option<&T> {
 		if 0 == self.size {
@@ -99,10 +104,40 @@ impl<'a, T> Iterator for IterMut<'a, T> {
 	}
 }
 
-fn bracket_match(bracket: &str) -> bool
-{
-	//TODO
-	true
+fn bracket_match(bracket: &str) -> bool {
+    // 创建一个空栈用于存储左括号
+    let mut stack = Stack::new();
+    // 遍历输入字符串中的每个字符
+    for c in bracket.chars() {
+        match c {
+            '(' | '{' | '[' => {
+                // 如果是左括号，则将其压入栈中
+                stack.push(c);
+            }
+            ')' => {
+                // 如果是右括号，则检查栈顶元素是否为对应的左括号
+                if stack.pop() != Some('(') {
+                    return false;
+                }
+            }
+            '}' => {
+                // 如果是右括号，则检查栈顶元素是否为对应的左括号
+                if stack.pop() != Some('{') {
+                    return false;
+                }
+            }
+            ']' => {
+                // 如果是右括号，则检查栈顶元素是否为对应的左括号
+                if stack.pop() != Some('[') {
+                    return false;
+                }
+            }
+            _ => {}
+            // 忽略其他字符
+        }
+    }
+    // 如果栈为空，说明括号匹配成功；否则匹配失败
+    stack.is_empty()
 }
 
 #[cfg(test)]

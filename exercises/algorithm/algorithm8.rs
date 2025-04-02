@@ -2,7 +2,6 @@
 	queue
 	This question requires you to use queues to implement the functionality of the stac
 */
-// I AM NOT DONE
 
 #[derive(Debug)]
 pub struct Queue<T> {
@@ -52,30 +51,51 @@ impl<T> Default for Queue<T> {
     }
 }
 
-pub struct myStack<T>
-{
-	//TODO
-	q1:Queue<T>,
-	q2:Queue<T>
+pub struct myStack<T> {
+    // 使用两个队列来模拟栈的行为
+    q1: Queue<T>,
+    q2: Queue<T>
 }
+
 impl<T> myStack<T> {
     pub fn new() -> Self {
         Self {
-			//TODO
-			q1:Queue::<T>::new(),
-			q2:Queue::<T>::new()
+            // 初始化两个队列
+            q1: Queue::<T>::new(),
+            q2: Queue::<T>::new()
         }
     }
+
     pub fn push(&mut self, elem: T) {
-        //TODO
+        // 将元素压入 q1 队列
+        self.q1.enqueue(elem);
     }
+
     pub fn pop(&mut self) -> Result<T, &str> {
-        //TODO
-		Err("Stack is empty")
+        // 如果 q1 为空，返回错误信息
+        if self.q1.is_empty() {
+            return Err("Stack is empty");
+        }
+
+        // 将 q1 中的所有元素（除了最后一个）移动到 q2
+        while self.q1.size() > 1 {
+            if let Ok(value) = self.q1.dequeue() {
+                self.q2.enqueue(value);
+            }
+        }
+
+        // q1 中剩下的最后一个元素即为栈顶元素，将其弹出并返回
+        let top = self.q1.dequeue().unwrap();
+
+        // 交换 q1 和 q2 的角色，以便下次操作
+        std::mem::swap(&mut self.q1, &mut self.q2);
+
+        Ok(top)
     }
+
     pub fn is_empty(&self) -> bool {
-		//TODO
-        true
+        // 栈为空当且仅当 q1 为空
+        self.q1.is_empty()
     }
 }
 

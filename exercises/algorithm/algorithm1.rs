@@ -2,7 +2,6 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -11,6 +10,8 @@ use std::vec::*;
 #[derive(Debug)]
 struct Node<T> {
     val: T,
+    //这是一个 Rust 标准库中的类型，表示一个非空的原始指针，它确保指针永远不会是空指针
+    //通过结合 Option 和 NonNull，可以在保证安全性的前提下实现类似链表的结构，同时避免直接使用裸指针带来的风险。
     next: Option<NonNull<Node<T>>>,
 }
 
@@ -69,15 +70,48 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
-	{
-		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+}
+
+impl<T> LinkedList<T>
+where
+    T: Ord,
+{
+    pub fn merge(list_a: LinkedList<T>, list_b: LinkedList<T>) -> Self {
+        let mut result = LinkedList::new();
+        let mut a_ptr = list_a.start;
+        let mut b_ptr = list_b.start;
+
+        while a_ptr.is_some() && b_ptr.is_some() {
+            let a_val = unsafe { &(*a_ptr.unwrap().as_ptr()).val };
+            let b_val = unsafe { &(*b_ptr.unwrap().as_ptr()).val };
+
+            if a_val <= b_val {
+                // 安全地转移节点所有权
+                let next_ptr = unsafe { (*a_ptr.unwrap().as_ptr()).next };
+                result.add(unsafe { Box::from_raw(a_ptr.unwrap().as_ptr()).val });
+                a_ptr = next_ptr;
+            } else {
+                let next_ptr = unsafe { (*b_ptr.unwrap().as_ptr()).next };
+                result.add(unsafe { Box::from_raw(b_ptr.unwrap().as_ptr()).val });
+                b_ptr = next_ptr;
+            }
         }
-	}
+
+        // 拼接剩余节点并确保尾部指针正确
+        while let Some(node_ptr) = a_ptr {
+            let next_ptr = unsafe { (*node_ptr.as_ptr()).next };
+            result.add(unsafe { Box::from_raw(node_ptr.as_ptr()).val });
+            a_ptr = next_ptr;
+        }
+
+        while let Some(node_ptr) = b_ptr {
+            let next_ptr = unsafe { (*node_ptr.as_ptr()).next };
+            result.add(unsafe { Box::from_raw(node_ptr.as_ptr()).val });
+            b_ptr = next_ptr;
+        }
+
+        result
+    }
 }
 
 impl<T> Display for LinkedList<T>

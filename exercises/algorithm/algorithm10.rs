@@ -2,7 +2,6 @@
 	graph
 	This problem requires you to implement a basic graph functio
 */
-// I AM NOT DONE
 
 use std::collections::{HashMap, HashSet};
 use std::fmt;
@@ -29,7 +28,49 @@ impl Graph for UndirectedGraph {
         &self.adjacency_table
     }
     fn add_edge(&mut self, edge: (&str, &str, i32)) {
-        //TODO
+        let (from, to, weight) = edge;
+
+        // 确保两个节点都存在于图中
+        self.add_node(from);
+        self.add_node(to);
+
+        // 添加 from -> to 方向的边
+        if let Some(edges) = self.adjacency_table_mutable().get_mut(from) {
+            // 检查边是否已经存在
+            let mut found = false;
+            for edge in edges.iter_mut() {
+                if edge.0 == to {
+                    // 如果边已存在，更新权重
+                    edge.1 = weight;
+                    found = true;
+                    break;
+                }
+            }
+
+            // 如果边不存在，添加新边
+            if !found {
+                edges.push((to.to_string(), weight));
+            }
+        }
+
+        // 由于是无向图，也需要添加 to -> from 方向的边
+        if let Some(edges) = self.adjacency_table_mutable().get_mut(to) {
+            // 检查边是否已经存在
+            let mut found = false;
+            for edge in edges.iter_mut() {
+                if edge.0 == from {
+                    // 如果边已存在，更新权重
+                    edge.1 = weight;
+                    found = true;
+                    break;
+                }
+            }
+
+            // 如果边不存在，添加新边
+            if !found {
+                edges.push((from.to_string(), weight));
+            }
+        }
     }
 }
 pub trait Graph {
@@ -37,8 +78,17 @@ pub trait Graph {
     fn adjacency_table_mutable(&mut self) -> &mut HashMap<String, Vec<(String, i32)>>;
     fn adjacency_table(&self) -> &HashMap<String, Vec<(String, i32)>>;
     fn add_node(&mut self, node: &str) -> bool {
-        //TODO
-		true
+        // 检查节点是否已经存在于图中
+        if self.contains(node) {
+            // 如果节点已存在，返回 false 表示添加失败
+            false
+        } else {
+            // 如果节点不存在，则将其添加到邻接表中
+            // 初始化一个空的邻居列表
+            self.adjacency_table_mutable().insert(node.to_string(), Vec::new());
+            // 返回 true 表示添加成功
+            true
+        }
     }
     fn add_edge(&mut self, edge: (&str, &str, i32)) {
         //TODO
