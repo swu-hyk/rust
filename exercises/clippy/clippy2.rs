@@ -8,6 +8,5 @@ fn main() {
     let mut res = 42;
     let option = Some(12);
     res += option.map_or(0, |x| x); 
-
     println!("{}", res);
 }
